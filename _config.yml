@@ -107,11 +107,11 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : "realwakka"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an amazing person."
+  bio              : "Just logger."
   location         : "Somewhere"
-  email            :
+  email            : "realwakka@gmail.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
