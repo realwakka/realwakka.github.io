@@ -17,10 +17,10 @@ remote_theme : mmistakes/minimal-mistakes
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Site Title"
+title                    : "logger"
 title_separator          : "-"
-name                     : "Your Name"
-description              : "An amazing website."
+name                     : "realwakka"
+description              : "Just logger."
 url                      : "https://realwakka.github.io"
 baseurl                  : ""
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
