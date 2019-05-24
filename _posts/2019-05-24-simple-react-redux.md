@@ -1,0 +1,1 @@
+정말 간단한 react-redux
