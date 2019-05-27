@@ -18,5 +18,5 @@ Redux는 이런 것들을 해결하기 위해 세가지 원칙을 제시하고 �
 
 일단 간단한 예제를 살펴보도록 하자!
 
-![My helpful screenshot]({{ "/assets/toggle.jpg" | absolute_url }})
+![My helpful screenshot]({{ "/assets/toggle.gif" | absolute_url }})
  
