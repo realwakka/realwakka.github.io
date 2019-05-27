@@ -1,5 +1,4 @@
-정말 간단한 react-redux 
-(간단한 Toggle 예제 작성하기)
+정말 간단한 react-redux (간단한 Toggle 예제 작성하기)
 =====================
 
 최근들어서 React에 관심이 많아졌다. 
