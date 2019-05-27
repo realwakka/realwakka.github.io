@@ -16,6 +16,10 @@ Redux는 이런 것들을 해결하기 위해 세가지 원칙을 제시하고 �
 2. 하나의 State는 읽기전용이다
 3. 변화는 순수함수로 구성되어야 한다
 
+Redux에서는 store의 개념이 등장하는 데 1번에서 이야기한 것과 같이 앱 내의 모든 State들의 집합이라고 볼 수 있다. 여러 Component가 가진 State들을 모아두는 개념이다.
+
+... 개념 설명 계속
+
 일단 간단한 예제를 살펴보도록 하자!
 
 ![My helpful screenshot]({{ "/assets/toggle.gif" | absolute_url }})
@@ -56,5 +60,4 @@ ReactDOM.render(
     </Provider>, rootElement);
 ```
 일반적으로 React를 쓰는 것과 크게 다르지 않지만 createStore()를 사용하는 것이 눈에 띈다. 그리고 앞에서 index.html에서 정의한 root element도 여기서 React를 통해서 render하고 있다.
-
 
