@@ -20,3 +20,41 @@ Redux는 이런 것들을 해결하기 위해 세가지 원칙을 제시하고 �
 
 ![My helpful screenshot]({{ "/assets/toggle.gif" | absolute_url }})
  
+그냥 클릭을 하면 글이 toggle 되면서 TRUE <-> FALSE를 반복하는 정말 쉬운 앱이다.
+
+일단 가장 처음 index.html이다.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <h1> this is html </h1>
+    <div id="root">
+    </div>
+  </body>
+</html>
+```
+
+일단 root라는 아이디를 가진 element를 선언하고 여기에 React App이 위치한다.
+
+그리고 root를 정의하고 있는 index.js이다.
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import App from './components/App';
+import toggleApp from './reducers';
+
+const store = createStore(toggleApp);
+const rootElement = document.getElementById('root');
+
+ReactDOM.render(
+	<Provider store={store}>
+		<App />
+    </Provider>, rootElement);
+```
+일반적으로 React를 쓰는 것과 크게 다르지 않지만 createStore()를 사용하는 것이 눈에 띈다. 그리고 앞에서 index.html에서 정의한 root element도 여기서 React를 통해서 render하고 있다.
+
+
