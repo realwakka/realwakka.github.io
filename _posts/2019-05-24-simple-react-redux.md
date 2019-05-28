@@ -1,3 +1,9 @@
+---
+layout: post
+title: 정말 간단한 react-redux
+comments: true
+categories: react
+---
 정말 간단한 react-redux
 =====================
 
@@ -217,4 +223,6 @@ Container에서 넘겨주는 Prop을 통해서 출력과 onClick을 구현한 �
 이것으로 redux를 정말 쉬운 예제로 설정해보았다.
 공부한지 얼마안되서 그런지 아직도 헷갈리는 것이 너무 많고 더 노력해야 겠다는 생각이 든다.
 
-[redux 주소](https://lunit.gitbook.io/redux-in-korean/).
+참조
+
+[redux 공식 튜토리얼](https://lunit.gitbook.io/redux-in-korean/)
