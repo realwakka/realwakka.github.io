@@ -1,7 +1,7 @@
 ---
 title: "정말 간단한 react-redux"
 comments: "true"
-categories: "React"
+categories: "react"
 ---
 
 
