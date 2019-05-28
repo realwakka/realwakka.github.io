@@ -1,11 +1,9 @@
 ---
-title: "easy react-redux"
+title: "정말 간단한 react-redux"
 comments: "true"
 categories: "React"
-layout: "post"
 ---
 
-정말 간단한 react-redux
 
 최근들어서 React에 관심이 많아졌다.
 React를 공부하다보니 redux에 관한 이야기가 나와서 적어보려고 한다.
