@@ -1,9 +1,10 @@
 ---
-layout: post
-title: 정말 간단한 react-redux
-comments: true
-categories: react
+title: "정말 간단한 react-redux"
+comments: "true"
+categories: "React"
+layout: "post"
 ---
+
 정말 간단한 react-redux
 =====================
 
