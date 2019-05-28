@@ -1,5 +1,5 @@
 ---
-title: "정말 간단한 react-redux"
+title: "easy react-redux"
 comments: "true"
 categories: "React"
 layout: "post"
