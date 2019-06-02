@@ -128,6 +128,7 @@ loop이 커널이 엔트리가 visible을 write 할때 까지 기다려야한다
 
 
 So, in a cleaned up form, code that reads from the ring buffer will look something like this:
+그래서 ring buffer를 읽는 코드는 다음과 같이 된다.
 
     while (header->tail == header->head)
         ;  /* Wait for an event to appear */
@@ -138,10 +139,20 @@ So, in a cleaned up form, code that reads from the ring buffer will look somethi
     item->ready_events = 0;  /* Mark event consumed */
     header->head++;
 In practice, this code is likely to be using C atomic operations rather than direct reads and writes, and head must be incremented in a circular fashion. But hopefully the idea is clear.
+이 코드는 직접 읽기/쓰기 동작 보다는 C의 atomic operations에 가깝다. 순환 방식에서 head가 증가되어야 한다. 그러나 이 아이디어는 명확하다.
+Busy-waiting on an empty ring buffer is obviously not ideal. Should the application find itself with nothing to do, it can still call epoll_wait() to block until something happens.
+This call will only succeed, though, if the events array is passed as NULL, and maxevents is set to zero;
+in other words, epoll_wait() will block, but it will not, itself, return any events to the caller.
+It will, though, helpfully return ESTALE to indicate that there are events available in the ring buffer.
+빈 ring-buffer를 Busy-waiting하는 것은 분명히 이상적이지 않다.  어플리케이션이 할일이 없어지면 epoll_wait()을 불러서 무언가 발생할 때까지 기다릴 수 있다.
+이 시스템콜이 성공이라도 이벤트 배열이 NULL로 전달되면 maxevents는 0으로 설정된다.
+다시말해서 epoll_wait()는 block되며 자체적으로 어떤 이벤트를 반환하지 않는다.
+비록 ESTALE을 반환해서 가능한 이벤트가 ring buffer에 있다는 것을 나타내주긴 한다.
 
-Busy-waiting on an empty ring buffer is obviously not ideal. Should the application find itself with nothing to do, it can still call epoll_wait() to block until something happens. This call will only succeed, though, if the events array is passed as NULL, and maxevents is set to zero; in other words, epoll_wait() will block, but it will not, itself, return any events to the caller. It will, though, helpfully return ESTALE to indicate that there are events available in the ring buffer.
-
-This patch set is in its third revision, and there appears to be little opposition to its inclusion at this point. The work has not yet found its way into linux-next, but it still seems plausible that it could be deemed ready for the 5.3 merge window.
+This patch set is in its third revision, and there appears to be little opposition to its inclusion at this point.
+The work has not yet found its way into linux-next, but it still seems plausible that it could be deemed ready for the 5.3 merge window.
+이 패치는 세번째 수정본이다. 이것이 지금 포함되는 것에 약간의 반대가 있다.
+아직 linux-next에 넣어지지 않았지만. 5.3 merge window에 준비가 된것 같아보인다.
 
 Some closing grumbles
 Figuring out the above interface required a substantial amount of reverse engineering of the code. This is a rather complex new API, but it is almost entirely undocumented; that will make it hard to use, but the lack of documentation also makes it hard to review the API in the first place. It is doubtful that anybody beyond the author has written any code to use this API at this point. Whether the development community will fully understand this API before committing to it is far from clear.
