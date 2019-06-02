@@ -13,16 +13,15 @@
 # theme                  : "minimal-mistakes-jekyll"
 # remote_theme           : "mmistakes/minimal-mistakes"
 minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
-remote_theme : mmistakes/minimal-mistakes
 
 # Site Settings
 locale                   : "en-US"
-title                    : "logger"
+title                    : "Site Title"
 title_separator          : "-"
-name                     : "realwakka"
-description              : "Just logger."
-url                      : "https://realwakka.github.io"
-baseurl                  : ""
+name                     : "Your Name"
+description              : "An amazing website."
+url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 logo                     : # path of logo image to display in the masthead, e.g. "/assets/images/88x88.png"
@@ -107,11 +106,11 @@ analytics:
 
 # Site Author
 author:
-  name             : "realwakka"
+  name             : "Your Name"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Just logger."
-  location         : "Korea"
-  email            : "realwakka@gmail.com"
+  bio              : "I am an amazing person."
+  location         : "Somewhere"
+  email            :
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
@@ -294,5 +293,3 @@ defaults:
       comments: # true
       share: true
       related: true
-
-theme: jekyll-theme-cayman
