@@ -46,11 +46,33 @@ Of course, epoll_create1() does not have a parameter that can be used for the si
 epoll_create1()은 크기에 관한 인자를 가지고 있지 않아 epoll_create2()를 추가한다.
 
     int epoll_create2(int flags, size_t size);
-There is a new flag, EPOLL_USERPOLL, that tells the kernel to use a ring buffer to communicate events; the size parameter says how many entries the ring buffer should hold. This size will be rounded up to the next power of two; the result sets an upper bound on the number of file descriptors that this epoll instance will be able to monitor. A maximum of 65,536 entries is enforced by the current patch set.
+There is a new flag, EPOLL_USERPOLL, that tells the kernel to use a ring buffer to communicate events;
+the size parameter says how many entries the ring buffer should hold.
+This size will be rounded up to the next power of two;
+the result sets an upper bound on the number of file descriptors that this epoll instance will be able to monitor.
+A maximum of 65,536 entries is enforced by the current patch set.
+새로운 EPOLL_USERPOLL flag이다. 이것은 이벤트를 교환하기 위한 ring buffer를 추가하는 옵션이다.
+size는 ring buffer가 가지는 엔트리의 크기이다.
+size는 2의 제곱의 형태로 올림이 되며 이것에 의해 모니터링 할 수 있는 fd의 크기가 결정 된다.
+이 패치에서는 65536개가 최대값으로 강제 설정된다.
 
-File descriptors are then added to the polling set in the usual way with epoll_ctl(). There are some restrictions that apply here, though, since some modes of operation are not compatible with user-space polling. In particular, every file descriptor must request edge-triggered behavior with the EPOLLET flag. Only one event will be added to the ring buffer when a file descriptor signals readiness; continually adding events for level-triggered behavior clearly would not work well. The EPOLLWAKEUP flag (which can be used to prevent system suspend while specific events are being processed) does not work in this mode; EPOLLEXCLUSIVE is also not supported.
+File descriptors are then added to the polling set in the usual way with epoll_ctl().
+There are some restrictions that apply here, though, since some modes of operation are not compatible with user-space polling.
+In particular, every file descriptor must request edge-triggered behavior with the EPOLLET flag.
+Only one event will be added to the ring buffer when a file descriptor signals readiness;
+continually adding events for level-triggered behavior clearly would not work well.
+The EPOLLWAKEUP flag (which can be used to prevent system suspend while specific events are being processed) does not work in this mode;
+EPOLLEXCLUSIVE is also not supported.
+fd는 polling set에 추가할 때 보통하던데로 epoll_ctl()을 사용한다. 약간의 제약사항이 생기는데 몇몇 연산이 이는 user-space polling과 호환이 되지 않아서 이다.
+이때 특이하게 모든 fd는 edge-triggered behavior를 사용해야하며 EPOLLET flag을 사용한다.
+fd가 읽기가 가능할 때 오직하나의 이벤트만 ring buffer에 추가된다.
+이벤트를 level-triggered behavior로 추가하면 제대로 동작하지 않는다.
+이벤트가 처리 될때 시스템 suspend를 막는 EPOLLWAKEUP 또한 제대로 동작되지 않으며 EPOLLEXCLUSIVE 또한 마찬가지이다.
 
-Two or three separate mmap() calls are required to map the ring buffer into user space. The first one should have an offset of zero and a length of one page; it will yield a page containing this structure:
+Two or three separate mmap() calls are required to map the ring buffer into user space.
+The first one should have an offset of zero and a length of one page; it will yield a page containing this structure:
+ring buffer을 userspace에서 매핑하기 위해서는 두세가지의 mmap()이 필요하다.
+처음에는 한페이지의 길이와 오프셋이 0으로 되고 이것은 아래의 구조체를 포함하는 페이지를 생성한다.
 
     struct epoll_uheader {
 	u32 magic;          /* epoll user header magic */
@@ -62,20 +84,48 @@ Two or three separate mmap() calls are required to map the ring buffer into user
 
 	struct epoll_uitem items[];
     };
-The header_length field, somewhat confusingly, contains the length of both the epoll_uheader structure and the items array. As seen in this example program, the intended use pattern appears to be that the application will map the header structure, get the real length, unmap the just-mapped page, then remap it using header_length to get the full items array.
 
-One might expect that items is the ring buffer, but there is a layer of indirection used here. Getting at the actual ring buffer requires calling mmap() another time with header_length as the offset and the index_length header field as the length. The result will be an array of integer indexes into the items array that functions as the real ring buffer.
+The header_length field, somewhat confusingly, contains the length of both the epoll_uheader structure and the items array.
+As seen in this example program, the intended use pattern appears to be that the application will map the header structure, get the real length, unmap the just-mapped page, then remap it using header_length to get the full items array.
+
+약간 헷갈리지만 헤더 길이 필드는 epoll_uheader와 배열 길이까지 포함한 값이다.
+예제프로그램에서 봤듯이 이 패턴을 사용하는 것은 어플리케이션이 이 구조체를 매핑할 때 실제크기가 필요하기 때문이다.
+
+One might expect that items is the ring buffer, but there is a layer of indirection used here.
+Getting at the actual ring buffer requires calling mmap() another time with header_length as the offset and the index_length header field as the length.
+The result will be an array of integer indexes into the items array that functions as the real ring buffer.
+
+아이템이 ring buffer 일거라고 생각하겠지만 여기서는 간접 레이어가 있따.
+실제 ring buffer를 얻는 것은 mmap()을 한번 더 호출하는 것을 필요로 한다.
+이것은 인덱스 배열을 반환하여 진짜 ring buffer처럼 동작한다.
 
 The actual items used to indicate events are represented by this structure:
+이벤트를 가리키는 데 사용되는 실제 아이템은 아래의 구조체로 표현된다.
 
     struct epoll_uitem {
 	__poll_t ready_events;
 	__poll_t events;
 	__u64 data;
     };
-Here, events appears to be the set of events that was requested when epoll_ctl() was called, and ready_events is the set of events that has actually happened. The data field comes through directly from the epoll_ctl() call that added this file descriptor.
 
-Whenever the head and tail fields differ, there is at least one event to be consumed from the ring buffer. To consume an event, the application should read the entry from the index array at head; this read should be performed in a loop until a non-zero value is found there. The loop, evidently, is required to wait, if necessary, until the kernel's write to that entry is visible. The value read is an index into the items array — almost. It is actually the index plus one. The data should be copied from the entry and ready_events set to zero; then the head index should be incremented.
+Here, events appears to be the set of events that was requested when epoll_ctl() was called,
+events는 epoll_ctl()을 호출했을 때 요청된 이벤트들의 set이다.
+and ready_events is the set of events that has actually happened.
+ready_events는 실제로 이벤트가 일어난 이벤트 들이다.
+The data field comes through directly from the epoll_ctl() call that added this file descriptor.
+data는 epoll_ctl()을 통해 직접 전달 된다.
+
+Whenever the head and tail fields differ, there is at least one event to be consumed from the ring buffer.
+To consume an event, the application should read the entry from the index array at head;
+this read should be performed in a loop until a non-zero value is found there.
+The loop, evidently, is required to wait, if necessary, until the kernel's write to that entry is visible.
+The value read is an index into the items array — almost. It is actually the index plus one.
+The data should be copied from the entry and ready_events set to zero; then the head index should be incremented.
+head과 tail이 다를 때 적어도 하나의 이벤트가 ringbuffer로 부터 처리 되었다는 것이다.
+이벤트를 처리하기 위해서는 어플리케이션이 인덱스 배열을 읽어야한다. 이것은 0이 아닌 값이 나올때 까지 loop을 도는 것이다.
+loop이 커널이 엔트리가 visible을 write 할때 까지 기다려야한다. 읽은 값은 아이템 배열의 인덱스 값이다. 사실은 +1한 값
+엔트리로부터 데이터가 복사되어야하고 ready_events가 0이 된다. 그리고 head 인덱스가 증가한다.
+
 
 So, in a cleaned up form, code that reads from the ring buffer will look something like this:
 
