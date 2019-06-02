@@ -106,11 +106,11 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : "sidong_yang"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an amazing person."
-  location         : "Somewhere"
-  email            :
+  bio              : "This is sidong_yang, developer."
+  location         : "Korea"
+  email            : "realwakka@gmail.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
