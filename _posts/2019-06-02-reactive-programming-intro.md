@@ -52,4 +52,8 @@ In our case, we mapped to the number 1 on each click.
 The scan(g) function aggregates all previous values on the stream, producing value x = g(accumulated, current),
 where g was simply the add function in this example. Then, counterStream emits the total number of clicks whenever a click happens.
 
+`map(f)` 함수는 발생한 각각의 value를 함수 f를 통해서 교체한다.
+이 경우에는 클릭당 숫자 1을 매핑 시켰다.
+`scan(g)` 함수는 이전의 스트림에 있는 value를 모아서 x value = g(accumulated, current) 의 형태로 값을 만들어낸다.
+예제에서는 간단히 더하기 함수를 적용시켰다. 이렇게 하면 countStream은 클릭된 숫자를 나타내게 된다.
 
