@@ -61,7 +61,6 @@ counterStream: ---1----2--3----4------5-->
 일단은 작은 것까지 이해하기는 어려울 지도 모른다. 앞의 함수의 결과는 리스트의 스트림이다. 우리는 이것에 `map()`을 적용시켜서 리스트의 길이를 나타내는 스트림을 만단다. 마지막으로 `filter(x >= 2)`를 통해서 1 값을 필터링한다.
 3개의 연산을 통해서 우리는 목표한 스트림을 만들어냈다. 그리고 이 스트림을 subscribe 또는 listen할 수 있다.
 
+이 접근방법의 아름다움을 느꼈으면 한다. 이 예제는 빙산의 일각에 불과하다.
+예를 들면 같은 연산을 여러 스트림에 적용할 수도 있으며 여러가지 다른 함수들도 사용할 수 있다.
 
-I hope you enjoy the beauty of this approach. This example is just the tip of the iceberg:
-you can apply the same operations on different kinds of streams, for instance, on a stream of API responses;
-on the other hand, there are many other functions available.
