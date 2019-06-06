@@ -47,13 +47,21 @@ X is an error
 counterStream: ---1----2--3----4------5-->
 ```
 
-The map(f) function replaces (into the new stream) each emitted value according to a function f you provide.
-In our case, we mapped to the number 1 on each click.
-The scan(g) function aggregates all previous values on the stream, producing value x = g(accumulated, current),
-where g was simply the add function in this example. Then, counterStream emits the total number of clicks whenever a click happens.
+`map(f)`에서는 각각의 이벤트 값이 f 함수로 전달된다. 이 경우에는 간단하게 1로 매핑했다. `scan(g)`에서는 스트림 이전의 값들을 모두 취합하여 x = g(accumulated, current)를 만들어 낸다.
+여기서 g는 간단하게 더하기 함수를 사용하였다. 그런 다음 counterStream은 총 클릭이 몇번이 일어났는가를 나타내게 된다.
 
-`map(f)` 함수는 발생한 각각의 value를 함수 f를 통해서 교체한다.
-이 경우에는 클릭당 숫자 1을 매핑 시켰다.
-`scan(g)` 함수는 이전의 스트림에 있는 value를 모아서 x value = g(accumulated, current) 의 형태로 값을 만들어낸다.
-예제에서는 간단히 더하기 함수를 적용시켰다. 이렇게 하면 countStream은 클릭된 숫자를 나타내게 된다.
+리액티브의 진정한 힘을 보여주기 위해서는 더블 클릭이벤트를 이야기 해보아야 한다. 트리플 클릭까지 더블클릭을 보는 보통, 다중 클릭을 생각하면 더 재밌는 이야기가 될것이다.
+만약에 당신이 이것을 기존의 imperative와 stateful한 방법으로 구현한다면 어떨지 생각해보아라. 짜증나고 몇몇의 변수들을 유지하면서 시간 간격과 씨름하게 될것이다.
 
+리액티브는 정말 간단하다. 로직은 단 4줄이다. 코드는 일단 나중에 보도록하자. 다이어그램으로 스트림 설계를 생각하는 것이 초보든 전문가든 최고의 방법이다.
+
+![Multiple clicks stream](http://i.imgur.com/HMGWNO5.png)
+
+회색 상자가 스트림을 변형시켜서 다른 스트림을 얻어내는 함수를 나타낸다. 처음으로 250ms 간격으로 발생한 이벤트를 리스트로 만들어 준다. 이것이 바로 `stream.throttle(250ms)`에서 하는일이다.
+일단은 작은 것까지 이해하기는 어려울 지도 모른다. 앞의 함수의 결과는 리스트의 스트림이다. 우리는 이것에 `map()`을 적용시켜서 리스트의 길이를 나타내는 스트림을 만단다. 마지막으로 `filter(x >= 2)`를 통해서 1 값을 필터링한다.
+3개의 연산을 통해서 우리는 목표한 스트림을 만들어냈다. 그리고 이 스트림을 subscribe 또는 listen할 수 있다.
+
+
+I hope you enjoy the beauty of this approach. This example is just the tip of the iceberg:
+you can apply the same operations on different kinds of streams, for instance, on a stream of API responses;
+on the other hand, there are many other functions available.
