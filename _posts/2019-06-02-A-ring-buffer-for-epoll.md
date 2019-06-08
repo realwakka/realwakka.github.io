@@ -95,6 +95,7 @@ The first one should have an offset of zero and a length of one page; it will yi
 ring buffer을 userspace에서 매핑하기 위해서는 두 세가지의 `mmap()`이 필요합니다.
 처음에는 한페이지의 길이와 오프셋이 0으로 되고 이것은 아래의 구조체를 포함하는 페이지를 생성합니다.
 '''c
+
     struct epoll_uheader {
 	u32 magic;          /* epoll user header magic */
 	u32 header_length;  /* length of the header + items */
@@ -105,6 +106,7 @@ ring buffer을 userspace에서 매핑하기 위해서는 두 세가지의 `mmap(
 
 	struct epoll_uitem items[];
     };
+
 '''
 <!--
 The header_length field, somewhat confusingly, contains the length of both the epoll_uheader structure and the items array.
@@ -129,11 +131,13 @@ The actual items used to indicate events are represented by this structure:
 이벤트를 가리키는 데 사용되는 실제 아이템은 아래의 구조체로 표현 됩니다.
 
 ```c
+
     struct epoll_uitem {
 	__poll_t ready_events;
 	__poll_t events;
 	__u64 data;
     };
+
 ```
 <!--
 Here, events appears to be the set of events that was requested when epoll_ctl() was called,
