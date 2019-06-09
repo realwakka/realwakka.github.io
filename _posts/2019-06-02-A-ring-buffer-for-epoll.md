@@ -4,7 +4,9 @@ comments: "true"
 categories:
   - linux
   - kernel
-tags: "linux", "kernel"
+tags:
+  - linux
+  - kernel
 ---
 
 lwn 기사에 대한 번역 글입니다.
