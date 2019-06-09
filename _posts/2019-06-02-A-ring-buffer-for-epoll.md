@@ -1,7 +1,10 @@
 ---
 title: "epoll을 위한 ring buffer"
 comments: "true"
-categories: "linux"
+categories:
+  - "linux"
+  - "kernel"
+  - "epoll"
 tags:
   - "linux"
   - "kernel"
