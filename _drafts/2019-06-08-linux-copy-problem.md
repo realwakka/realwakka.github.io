@@ -6,21 +6,75 @@ categories: "linux"
 
 <!--
 In a filesystem session on the third day of the 2019 Linux Storage, Filesystem, and Memory-Management Summit (LSFMM),
-Steve French wanted to talk about copy operations. Much of the development work that has gone on in the Linux filesystem world over the last few years has been related to the performance of copying files, at least indirectly, he said. There are still pain points around copy operations, however, so he would like to see those get addressed.
+Steve French wanted to talk about copy operations.
+Much of the development work that has gone on in the Linux filesystem world over the last few years has been
+related to the performance of copying files, at least indirectly, he said. There are still pain points around copy
+operations, however, so he would like to see those get addressed.
 -->
 
-2019 LSFMM의 세 번째 날의 파일시스템 세션입니다.
+2019 LSFMM의 세 번째 날의 파일시스템 세션에 Steve French의 복사 연산을 주제로 발표가 있었습니다.
+많은 리눅스의 파일 복사에 대한 개발이 최근 몇년 사이에 많이 있었습니다. 하지만 아직도 뼈아픈 단점들이 있고 그것에 대한 이야기를 하려고 합니다.
 
-The "copy problem" is something that has been discussed at LSFMM before, French said, but things have gotten better over the last year due to efforts by Oracle, Amazon, Microsoft, and others. Things are also changing for copy operations; many of them are done to and from the cloud, which has to deal with a wide variation in network latency. At the other end, NVMe is making larger storage faster at a relatively affordable price. Meanwhile virtualization is taking more CPU, at times, because operations that might have been offloaded to network hardware are being handled by the CPU.
+<!--
+The "copy problem" is something that has been discussed at LSFMM before, French said,
+but things have gotten better over the last year due to efforts by Oracle, Amazon, Microsoft, and others.
+Things are also changing for copy operations; many of them are done to and from the cloud, which has to deal with
+a wide variation in network latency. At the other end, NVMe is making larger storage faster at a relatively
+affordable price. Meanwhile virtualization is taking more CPU, at times, because operations that might have been
+offloaded to network hardware are being handled by the CPU.
+-->
 
+복사 문제는 LSFMM에서 이전에 다루었던 문제이긴합니다. 하지만 오라클, 아마존, 마이크로소프트 등등의 노력으로 좀 더 발전하고 있습니다.
+복사 연산 또한 많은 변화 생기고 있습니다. 많은 연산이 클라우드에서 이루어지며 그것은 네트워크 지연과 많은 연관이 있습니다.
+또한 NVMe는 큰 용량과 빠른 속도를 적절한 가격에 제공하고 있습니다. 가상화는 많은 CPU연산을 필요로 하지만 네트워크 장치로 념긴 연산은 CPU에서 처리됩니다.
+
+<!--
 [Steve French]
-But copying files is one of the simplest, most intuitive operations for users; people do it all the time. He made multiple copies of his presentation slides in various locations, for example. Some of the most common utilities used are rsync, which is part of the Samba tools, scp from OpenSSH, and cp from the coreutils.
+But copying files is one of the simplest, most intuitive operations for users; people do it all the time.
+ He made multiple copies of his presentation slides in various locations, for example.
+ Some of the most common utilities used are rsync, which is part of the Samba tools, scp from OpenSSH, and cp from the coreutils.
+-->
 
-The source code for cp is "almost embarrassingly small" at around 4K lines of code; scp is about the same and rsync is somewhat larger. They each have to deal with some corner cases as well. He showed some examples of the amount of time it takes to copy files on Btrfs and ext4 on two different drives attached to his laptop, one faster and one slower. On the slow drive with Btrfs, scp took almost five times as long as cp for a 1GB copy. On the fast drive, for a 2GB copy on ext4, cp took 1.2s (1.7s on the slow), scp 1.7s (8.4s), and rsync took 4.3s (not run on the slow drive, apparently). These represent "a dramatic difference in performance" for a "really stupid" copy operation
+그러나 파일을 복사하는 것은 정말 간단하고 사용자에게 직관적입니다. 사람들이 계속 사용합니다.
+여러가지 슬라이드를 여러 위치에 복사하는 것도 하나의 예시입니다.
+가장 일반적인 유틸은 rsync가 있습니다. Samba, scp, cp의 일부입니다.
 
-The I/O size for cp is 128K and the others use 16K, which explains some of the difference, he said. These copies are all going through the page cache, which is kind of odd because you don't normally need the data you just copied again. None of the utilities uses O_DIRECT, if they did there would an improvement in the performance of a few percent, he said. Larger I/O sizes would also improve things.
+<!--
+The source code for cp is "almost embarrassingly small" at around 4K lines of code; scp is about the same and r
+sync is somewhat larger. They each have to deal with some corner cases as well. He showed some examples of the
+amount of time it takes to copy files on Btrfs and ext4 on two different drives attached to his laptop, one faster
+and one slower. On the slow drive with Btrfs, scp took almost five times as long as cp for a 1GB copy.
+On the fast drive, for a 2GB copy on ext4, cp took 1.2s (1.7s on the slow), scp 1.7s (8.4s), and rsync took 4.3s (not run on the slow drive, apparently).
+These represent "a dramatic difference in performance" for a "really stupid" copy operation
+-->
 
-There are alternative tools that make various changes to improve performance. For example, parcp and parallel parallelize copy operations. In addition, fpart and fpsync can parallelize the operations that copy directories. Beyond that, Mutil is a parallel copy that is based on the cp and md5sum code from coreutils; it comes out of a ten-year old paper [PDF] covering some work that NASA did on analyzing copy performance because the agency found Linux cp to be lacking. The code never went upstream, however, so it can't even be built at this point, French said.
+`cp`의 소스코드는 당황스러울리만큼 간단합니다. 4000줄 정도 됩니다. scp는 rsync와 비슷하거나 좀 더 깁니다. scp는 좀 더 특이 케이스들이 많습니다.
+그는 노트북에서 Btrfs와 ext4의 2개의 드라이버에서 복사에 걸린 시간을 보여주었습니다. Btrfs에서는 느립니다. scp가 거의 1기가를 복사하는 데 cp보다 거의 5배가 들었습니다.
+ext4에서는 2기가를 복사하는데 cp는 1.2초 (btrfs에서는 1.7초), scp는 1.7초 (btrfs 8.4초)가 걸렸고 rsync는 4.3초 (btrfs에서는 실행하지 않음)가 걸렸습니다.
+이것은 복사연산에 대한 엄청난 성능차이를 보여줍니다.
+
+<!--
+The I/O size for cp is 128K and the others use 16K, which explains some of the difference, he said.
+These copies are all going through the page cache, which is kind of odd because you don't normally need the data
+you just copied again. None of the utilities uses O_DIRECT, if they did there would an improvement in
+the performance of a few percent, he said. Larger I/O sizes would also improve things.
+-->
+
+보통 `cp`에 대한 I/O 크기는 128K이며 다른 것들은 16K입니다. 이것이 차이를 가져오는 것이죠.
+복사하는 것은 페이지 캐시와 연관이 깊습니다. 이건 좀 이상한 것 같습니다! 한번 복사한 다음에는 캐시가 필요하진 않으니 말이죠.
+유틸리티들은 `O_DIRECT`를 사용하지 않습니다. 만약에 사용했으면 약간의 성능이 올라갔겠지만 I/O 크기를 키우는 것이 더 좋은 성능 향상을 이끌어냅니다.
+
+<!--
+There are alternative tools that make various changes to improve performance.
+For example, parcp and parallel parallelize copy operations. In addition, fpart and fpsync can parallelize
+the operations that copy directories. Beyond that, Mutil is a parallel copy that is based on the cp and md5sum code
+from coreutils; it comes out of a ten-year old paper [PDF] covering some work that NASA did on analyzing copy
+performance because the agency found Linux cp to be lacking. The code never went upstream, however, so it can't even
+be built at this point, French said.
+-->
+
+이것을 대체할 수 있는 다른 여러가지 툴이 있습니다. `parcp`와 복사연산을 병렬화 하는것입니다. 추가적으로 `fpart`와 `fpsync` 또한 디렉토리 복사를 병렬화 할 수 있습니다.
+이것 시아으로 'Multi'는 'cp'와 'md5sum'을 사용해서 만든 병렬 복사입니다.
 
 Cluster environments and network filesystems would rather have the server handle the copies directly using copy offload. Cloud providers would presumably prefer to have their backends handle copy operations rather than have them done directly from clients, he said. Also parallelization is a need because the common tools overuse one processor rather than spreading the load, especially if you are doing any encryption. In addition, local cross-mount copies are not being done efficiently; he believes that Linux filesystems could do a much better job in the kernel than cp does in user space even if they were copying between two different mounted filesystems of the same type.
 
