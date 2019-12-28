@@ -1,5 +1,5 @@
 ---
-title: "새로운 비동기 I/O API 안의 Ring"
+title: "Ringing을 이용한 새로운 비동기 I/O API (io_uring)"
 comments: "true"
 categories: "linux"
 tags:
