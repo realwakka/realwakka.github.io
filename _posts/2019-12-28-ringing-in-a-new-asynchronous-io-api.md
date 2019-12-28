@@ -1,5 +1,5 @@
 ---
-title: "»õ·Î¿î ºñµ¿±â I/O API ¾ÈÀÇ Ring"
+title: "ìƒˆë¡œìš´ ë¹„ë™ê¸° I/O API ì•ˆì˜ Ring"
 comments: "true"
 categories: "linux"
 tags:
@@ -8,22 +8,22 @@ tags:
   - "io_uring"
 ---
 
-lwn ±â»çÀÇ ¹ø¿ª ±ÛÀÔ´Ï´Ù.
+lwn ê¸°ì‚¬ì˜ ë²ˆì—­ ê¸€ìž…ë‹ˆë‹¤.
 
 <!-- While the kernel has had support for asynchronous I/O (AIO) since the 2.5 development cycle, it has also had people complaining about AIO for about that long. The current interface is seen as difficult to use and inefficient; additionally, some types of I/O are better supported than others. That situation may be about to change with the introduction of a proposed new interface from Jens Axboe called "io_uring". As might be expected from the name, io_uring introduces just what the kernel needed more than anything else: yet another ring buffer. -->
 
-2.5 °³¹ß »çÀÌÅ¬ ÀÌÈÄ·Î ¸®´ª½º Ä¿³ÎÀº ºñµ¿±â IO¸¦ Á¦°øÇßÁö¸¸ °è¼ÓµÇ´Â »ç¿ëÀÚµéÀÇ ºÒ¸¸ÀÌ ÀÖ½À´Ï´Ù. ÇöÀç ÀÎÅÍÆäÀÌ½º´Â »ç¿ëÇÏ±â ¾î·Æ°í ºñÈ¿À²ÀûÀÔ´Ï´Ù. ¸î¸î IO Å¸ÀÔÀÌ ´Ù¸¥ °Íµéº¸´Ù ´õ ÁÁ°Ô Áö¿øµÇ¾ú½À´Ï´Ù. ÀÌ ¶§ Jens Axboe°¡ »õ·Î¿î ÀÎÅÍÆäÀÌ½º "io_uring"À» ¼Ò°³ÇÏ¿´½À´Ï´Ù. ÀÌ¸§¿¡¼­ ¾Ë ¼ö ÀÖµíÀÌ, io_uringÀº Ä¿³Î¿¡¼­ ÇÊ¿äÇÑ ¶Ç ´Ù¸¥ ring buffer¸¦ ¼Ò°³ÇÕ´Ï´Ù.
+2.5 ê°œë°œ ì‚¬ì´í´ ì´í›„ë¡œ ë¦¬ëˆ…ìŠ¤ ì»¤ë„ì€ ë¹„ë™ê¸° IOë¥¼ ì œê³µí–ˆì§€ë§Œ ê³„ì†ë˜ëŠ” ì‚¬ìš©ìžë“¤ì˜ ë¶ˆë§Œì´ ìžˆìŠµë‹ˆë‹¤. í˜„ìž¬ ì¸í„°íŽ˜ì´ìŠ¤ëŠ” ì‚¬ìš©í•˜ê¸° ì–´ë µê³  ë¹„íš¨ìœ¨ì ìž…ë‹ˆë‹¤. ëª‡ëª‡ IO íƒ€ìž…ì´ ë‹¤ë¥¸ ê²ƒë“¤ë³´ë‹¤ ë” ì¢‹ê²Œ ì§€ì›ë˜ì—ˆìŠµë‹ˆë‹¤. ì´ ë•Œ Jens Axboeê°€ ìƒˆë¡œìš´ ì¸í„°íŽ˜ì´ìŠ¤ "io_uring"ì„ ì†Œê°œí•˜ì˜€ìŠµë‹ˆë‹¤. ì´ë¦„ì—ì„œ ì•Œ ìˆ˜ ìžˆë“¯ì´, io_uringì€ ì»¤ë„ì—ì„œ í•„ìš”í•œ ë˜ ë‹¤ë¥¸ ring bufferë¥¼ ì†Œê°œí•©ë‹ˆë‹¤.
 
 Setting up
 
 <!-- Any AIO implementation must provide for the submission of operations and the collection of completion data at some future point in time. In io_uring, that is handled through two ring buffers used to implement a submission queue and a completion queue. The first step for an application is to set up this structure a using new system call:
-¸ðµç AIO ±¸ÇöÀº ¿¬»êÀ» Á¦Ãâ(submission)ÇÏ´Â °Í°ú ¹Ì·¡ ½ÃÁ¡¿¡ ¿Ï·á(completion)µÈ µ¥ÀÌÅÍÀÇ ¹­À½À» Á¦°øÇÕ´Ï´Ù. io_uringÀº submission queue¿Í completion queue, ÃÑ µÎ°³ÀÇ ring buffer·Î »ç¿ëÇÕ´Ï´Ù. ¾îÇÃ¸®ÄÉÀÌ¼Ç¿¡¼­ÀÇ Ã¹¹øÂ° °úÁ¤Àº »õ·Î¿î ½Ã½ºÅÛ ÄÝÀ» ÅëÇØ¼­ ÀÌ ±¸Á¶Ã¼¸¦ ÃÊ±âÈ­ÇÏ´Â °ÍÀÔ´Ï´Ù. -->
+ëª¨ë“  AIO êµ¬í˜„ì€ ì—°ì‚°ì„ ì œì¶œ(submission)í•˜ëŠ” ê²ƒê³¼ ë¯¸ëž˜ ì‹œì ì— ì™„ë£Œ(completion)ëœ ë°ì´í„°ì˜ ë¬¶ìŒì„ ì œê³µí•©ë‹ˆë‹¤. io_uringì€ submission queueì™€ completion queue, ì´ ë‘ê°œì˜ ring bufferë¡œ ì‚¬ìš©í•©ë‹ˆë‹¤. ì–´í”Œë¦¬ì¼€ì´ì…˜ì—ì„œì˜ ì²«ë²ˆì§¸ ê³¼ì •ì€ ìƒˆë¡œìš´ ì‹œìŠ¤í…œ ì½œì„ í†µí•´ì„œ ì´ êµ¬ì¡°ì²´ë¥¼ ì´ˆê¸°í™”í•˜ëŠ” ê²ƒìž…ë‹ˆë‹¤. -->
 ```c
     int io_uring_setup(int entries, struct io_uring_params *params);
 ```
 
 <!-- The entries parameter is used to size both the submission and completion queues. The params structure looks like this: -->
-entires ÀÎÀÚ´Â submission°ú completion ¸ðµÎ¿¡ »ç¿ëµË´Ï´Ù. ±¸Á¶Ã¼´Â ¾Æ·¡¿Í °°ÀÌ »ý°å½À´Ï´Ù.
+entires ì¸ìžëŠ” submissionê³¼ completion ëª¨ë‘ì— ì‚¬ìš©ë©ë‹ˆë‹¤. êµ¬ì¡°ì²´ëŠ” ì•„ëž˜ì™€ ê°™ì´ ìƒê²¼ìŠµë‹ˆë‹¤.
 ```c
     struct io_uring_params {
 	__u32 sq_entries;
@@ -36,11 +36,11 @@ entires ÀÎÀÚ´Â submission°ú completion ¸ðµÎ¿¡ »ç¿ëµË´Ï´Ù. ±¸Á¶Ã¼´Â ¾Æ·¡¿Í °°ÀÌ »
 ```
 <!-- On entry, this structure (with the possible exception of flags as described later) should simply be initialized to zero. On return from a successful call, the sq_entries and cq_entries fields will be set to the actual sizes of the submission and completion queues; the code is set up to allocate entries submission entries, and twice that many completion entries. -->
 
-ÃÊ±â¿¡ ÀÌ ±¸Á¶Ã¼´Â 0À¸·Î ÃÊ±âÈ­µÇ¾î¾ß ÇÕ´Ï´Ù. È£Ãâ¿¡ ¼º°øÇÏ¸é, sq_entries¿Í cq_entries ÇÊµå°¡ ½ÇÁ¦ submission°ú completion queueÀÇ »çÀÌÁî·Î ¼¼ÆÃµË´Ï´Ù. ÀÌ ÄÚµå´Â submission ¿£Æ®¸®¸¦ ÇÒ´ç ÇÏ°í ±× µÎ¹è¸¦ completion ¿£Æ®¸®·Î ÇÒ´çÇÕ´Ï´Ù.
+ì´ˆê¸°ì— ì´ êµ¬ì¡°ì²´ëŠ” 0ìœ¼ë¡œ ì´ˆê¸°í™”ë˜ì–´ì•¼ í•©ë‹ˆë‹¤. í˜¸ì¶œì— ì„±ê³µí•˜ë©´, sq_entriesì™€ cq_entries í•„ë“œê°€ ì‹¤ì œ submissionê³¼ completion queueì˜ ì‚¬ì´ì¦ˆë¡œ ì„¸íŒ…ë©ë‹ˆë‹¤. ì´ ì½”ë“œëŠ” submission ì—”íŠ¸ë¦¬ë¥¼ í• ë‹¹ í•˜ê³  ê·¸ ë‘ë°°ë¥¼ completion ì—”íŠ¸ë¦¬ë¡œ í• ë‹¹í•©ë‹ˆë‹¤.
 
 <!-- The return value from io_uring_setup() is a file descriptor that can then be passed to mmap() to map the buffer into the process's address space. More specifically, three calls are needed to map the two ring buffers and an array of submission-queue entries; the information needed to do this mapping will be found in the sq_off and cq_off fields of the io_uring_params structure. In particular, the submission queue, which is a ring of integer array indices, is mapped with a call like: -->
 
-io_uring_setup()ÀÇ ¸®ÅÏ °ªÀº file descriptor(fd)ÀÌ¸ç ¹öÆÛ¸¦ ÇÁ·Î¼¼½ºÀÇ address space·Î ¸ÅÇÎÇÏ±â À§ÇØ mmap()¿¡ ³ÖÀ» ¼ö ÀÖ½À´Ï´Ù. Á» ´õ ÀÚ¼¼ÇÏ°Ô ÀÌ¾ß±âÇÏÀÚ¸é, µÎ°³ÀÇ ring buffer¿Í submission queue ¿£Æ®¸® ¹è¿­À» ¸ÅÇÎÇÏ±â À§ÇØ¼­´Â ¼¼¹øÀÇ ÇÔ¼ö È£ÃâÀÌ ÇÊ¿äÇÕ´Ï´Ù. ÀÌ ¸ÅÇÎÀ» ÇÏ±â À§ÇÑ °ªÀº io_uring_params ±¸Á¶Ã¼ÀÇ sq_off¿Í cq_off ÇÊµå¿¡¼­ ±¸ÇÒ ¼ö ÀÖ½À´Ï´Ù. Æ¯È÷ Á¤¼ö ¹è¿­ÀÇ ÇüÅÂ¸¦ °¡Áø queue submissionÀº ´ÙÀ½°ú °°Àº È£ÃâÀ» ÅëÇØ¼­ ¸ÅÇÎµË´Ï´Ù.
+io_uring_setup()ì˜ ë¦¬í„´ ê°’ì€ file descriptor(fd)ì´ë©° ë²„í¼ë¥¼ í”„ë¡œì„¸ìŠ¤ì˜ address spaceë¡œ ë§¤í•‘í•˜ê¸° ìœ„í•´ mmap()ì— ë„£ì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ì¢€ ë” ìžì„¸í•˜ê²Œ ì´ì•¼ê¸°í•˜ìžë©´, ë‘ê°œì˜ ring bufferì™€ submission queue ì—”íŠ¸ë¦¬ ë°°ì—´ì„ ë§¤í•‘í•˜ê¸° ìœ„í•´ì„œëŠ” ì„¸ë²ˆì˜ í•¨ìˆ˜ í˜¸ì¶œì´ í•„ìš”í•©ë‹ˆë‹¤. ì´ ë§¤í•‘ì„ í•˜ê¸° ìœ„í•œ ê°’ì€ io_uring_params êµ¬ì¡°ì²´ì˜ sq_offì™€ cq_off í•„ë“œì—ì„œ êµ¬í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤. íŠ¹ížˆ ì •ìˆ˜ ë°°ì—´ì˜ í˜•íƒœë¥¼ ê°€ì§„ queue submissionì€ ë‹¤ìŒê³¼ ê°™ì€ í˜¸ì¶œì„ í†µí•´ì„œ ë§¤í•‘ë©ë‹ˆë‹¤.
 ```c
     subqueue = mmap(0, params.sq_off.array + params.sq_entries*sizeof(__u32),
     		    PROT_READ|PROT_WRITE|MAP_SHARED|MAP_POPULATE,
@@ -48,7 +48,7 @@ io_uring_setup()ÀÇ ¸®ÅÏ °ªÀº file descriptor(fd)ÀÌ¸ç ¹öÆÛ¸¦ ÇÁ·Î¼¼½ºÀÇ address s
 ```
 <!-- Where params is the io_uring_params structure, and ring_fd is the file descriptor returned from io_uring_setup(). The addition of params.sq_off.array to the length of the region accounts for the fact that the ring is not located right at the beginning. The actual array of submission-queue entries, instead, is mapped with: -->
 
-paramsÀÇ io_uring_params ±¸Á¶Ã¼¿¡¼­, ring_fd´Â io_uring_setup()¿¡¼­ ¸®ÅÏµÈ fdÀÔ´Ï´Ù. params.sq_off.array¿¡ ¿µ¿ªÀÇ ±æÀÌ¸¦ ´õÇÏ´Â °Í(params.sq_off.array + params.sq_entries*sizeof(__u32))Àº ringÀÌ Á¤È®È÷ Ã³À½¿¡ À§Ä¡ÇÏÁö ¾Ê´Â »ç½ÇÀ» ³ªÅ¸³À´Ï´Ù. ´ë½Å¿¡ ½ÇÁ¦ submission queue ¿£Æ®¸®ÀÇ ±æÀÌ´Â ¾Æ·¡¿Í °°Àº ¹æ¹ýÀ¸·Î ¸ÅÇÎÇÕ´Ï´Ù.
+paramsì˜ io_uring_params êµ¬ì¡°ì²´ì—ì„œ, ring_fdëŠ” io_uring_setup()ì—ì„œ ë¦¬í„´ëœ fdìž…ë‹ˆë‹¤. params.sq_off.arrayì— ì˜ì—­ì˜ ê¸¸ì´ë¥¼ ë”í•˜ëŠ” ê²ƒ(params.sq_off.array + params.sq_entries*sizeof(__u32))ì€ ringì´ ì •í™•ížˆ ì²˜ìŒì— ìœ„ì¹˜í•˜ì§€ ì•ŠëŠ” ì‚¬ì‹¤ì„ ë‚˜íƒ€ëƒ…ë‹ˆë‹¤. ëŒ€ì‹ ì— ì‹¤ì œ submission queue ì—”íŠ¸ë¦¬ì˜ ê¸¸ì´ëŠ” ì•„ëž˜ì™€ ê°™ì€ ë°©ë²•ìœ¼ë¡œ ë§¤í•‘í•©ë‹ˆë‹¤.
 ```c
     sqentries = mmap(0, params.sq_entries*sizeof(struct io_uring_sqe),
     		    PROT_READ|PROT_WRITE|MAP_SHARED|MAP_POPULATE,
@@ -56,18 +56,18 @@ paramsÀÇ io_uring_params ±¸Á¶Ã¼¿¡¼­, ring_fd´Â io_uring_setup()¿¡¼­ ¸®ÅÏµÈ fdÀÔ´
 ```
 <!-- This separation of the queue entries from the ring buffer is needed because I/O operations may well complete in an order different from the submission order. The completion queue is simpler, since the entries are not separated from the queue itself; the incantation required is similar: -->
 
-submissionÀÇ ¼ø¼­¿Í´Â ´Ù¸£°Ô IO µ¿ÀÛÀÌ ¿Ï·áµÇ±â ¶§¹®¿¡ ring buffer·ÎºÎÅÍ queue entries¸¦ ºÐ¸®µÇ¾î ÀÖ½À´Ï´Ù. completion queueÀÇ °æ¿ì´Â ´õ ½±½À´Ï´Ù. queue¿Í ¿£Æ®¸®°¡ ºÐ¸®µÇ¾î ÀÖÁö ¾Ê±â ¶§¹®ÀÔ´Ï´Ù. »ç¿ëÇÏ´Â ¹æ¹ýÀº ºñ½ÁÇÕ´Ï´Ù.
+submissionì˜ ìˆœì„œì™€ëŠ” ë‹¤ë¥´ê²Œ IO ë™ìž‘ì´ ì™„ë£Œë˜ê¸° ë•Œë¬¸ì— ring bufferë¡œë¶€í„° queue entriesë¥¼ ë¶„ë¦¬ë˜ì–´ ìžˆìŠµë‹ˆë‹¤. completion queueì˜ ê²½ìš°ëŠ” ë” ì‰½ìŠµë‹ˆë‹¤. queueì™€ ì—”íŠ¸ë¦¬ê°€ ë¶„ë¦¬ë˜ì–´ ìžˆì§€ ì•Šê¸° ë•Œë¬¸ìž…ë‹ˆë‹¤. ì‚¬ìš©í•˜ëŠ” ë°©ë²•ì€ ë¹„ìŠ·í•©ë‹ˆë‹¤.
 ```c
     cqentries = mmap(0, params.cq_off.cqes + params.cq_entries*sizeof(struct io_uring_cqe),
     		    PROT_READ|PROT_WRITE|MAP_SHARED|MAP_POPULATE,
 		    ring_fd, IORING_OFF_CQ_RING);
 ```
 <!-- It's perhaps worth noting at this point that Axboe is working on a user-space library that hide will much of the complexity of this interface from most users. -->
-Axboe°¡ userspace ¶óÀÌºê·¯¸®¿¡¼­ ÀÛ¾÷À» ÇÏ¸ç ´ëºÎºÐÀÇ »ç¿ëÀÚ¿¡°Ô ÀÎÅÍÆäÀÌ½ºÀÇ º¹Àâµµ¸¦ ¼û±æ ¼ö ÀÖ´Ù´Â Á¡¿¡¼­ ÁÖ¸ñÇÒ ÇÊ¿ä°¡ ÀÖ½À´Ï´Ù.
+Axboeê°€ userspace ë¼ì´ë¸ŒëŸ¬ë¦¬ì—ì„œ ìž‘ì—…ì„ í•˜ë©° ëŒ€ë¶€ë¶„ì˜ ì‚¬ìš©ìžì—ê²Œ ì¸í„°íŽ˜ì´ìŠ¤ì˜ ë³µìž¡ë„ë¥¼ ìˆ¨ê¸¸ ìˆ˜ ìžˆë‹¤ëŠ” ì ì—ì„œ ì£¼ëª©í•  í•„ìš”ê°€ ìžˆìŠµë‹ˆë‹¤.
 
 I/O submission
 <!-- Once the io_uring structure has been set up, it can be used to perform asynchronous I/O. Submitting an I/O request involves filling in an io_uring_sqe structure, which looks like this (simplified a bit): -->
-Ã³À½¿¡ io_uring ±¸Á¶Ã¼°¡ ¼¼ÆÃµÇ¸é, ºñµ¿±â IO¸¦ ¼öÇàÇÏ´Â µ¥ »ç¿ëµË´Ï´Ù. io_uring_sqe ±¸Á¶Ã¼¸¦ Ã¤¿ì°í IO µ¿ÀÛÀ» ¿äÃ»ÇÏ¸ç, io_uring_sqe´Â ¾à°£ °£¼ÒÈ­µÇ¾î ¾Æ·¡¿Í °°½À´Ï´Ù.
+ì²˜ìŒì— io_uring êµ¬ì¡°ì²´ê°€ ì„¸íŒ…ë˜ë©´, ë¹„ë™ê¸° IOë¥¼ ìˆ˜í–‰í•˜ëŠ” ë° ì‚¬ìš©ë©ë‹ˆë‹¤. io_uring_sqe êµ¬ì¡°ì²´ë¥¼ ì±„ìš°ê³  IO ë™ìž‘ì„ ìš”ì²­í•˜ë©°, io_uring_sqeëŠ” ì•½ê°„ ê°„ì†Œí™”ë˜ì–´ ì•„ëž˜ì™€ ê°™ìŠµë‹ˆë‹¤.
 ```c
     struct io_uring_sqe {
 	__u8	opcode;		/* type of operation for this sqe */
@@ -87,11 +87,11 @@ I/O submission
 ```
 <!-- The opcode describes the operation to be performed; options include IORING_OP_READV, IORING_OP_WRITEV, IORING_OP_FSYNC, and a couple of others that we will return to. There are clearly a number of parameters that affect how the I/O is performed, but most of them are relatively straightforward: fd describes the file on which the I/O will be performed, for example, while addr and len describe a set of iovec structures pointing to the memory where the I/O is to take place. -->
 
-opcode´Â ¼öÇàµÉ µ¿ÀÛÀ» ³ªÅ¸³À´Ï´Ù. ¿É¼Ç¿¡´Â IORING_OP_READV, IORING_OP_WRITEV, IORING_OP_FSYNC°°Àº °ÍµéÀÌ ÀÖ½À´Ï´Ù. IO°¡ ¾î¶»°Ô µ¿ÀÛÇÒ Áö¿¡ ¿µÇâÀ» ³¢Ä¡´Â ¿©·¯ ÀÎÀÚ°¡ ÀÖ½À´Ï´Ù. ÇÏÁö¸¸ ´ëºÎºÐÀº »ó´ëÀûÀ¸·Î °£´ÜÇÕ´Ï´Ù. ¿¹¸¦ µé¸é fd´Â IO°¡ ÀÏ¾î³¯ ÆÄÀÏÀ» ÀÌ¾ß±âÇÏ¸ç, addr°ú lenÀº IO°¡ ÀÏ¾î³ª´Â ¸Þ¸ð¸®¸¦ °¡¸®Å°´Â iovec ±¸Á¶Ã¼¸¦ ³ªÅ¸³À´Ï´Ù.
+opcodeëŠ” ìˆ˜í–‰ë  ë™ìž‘ì„ ë‚˜íƒ€ëƒ…ë‹ˆë‹¤. ì˜µì…˜ì—ëŠ” IORING_OP_READV, IORING_OP_WRITEV, IORING_OP_FSYNCê°™ì€ ê²ƒë“¤ì´ ìžˆìŠµë‹ˆë‹¤. IOê°€ ì–´ë–»ê²Œ ë™ìž‘í•  ì§€ì— ì˜í–¥ì„ ë¼ì¹˜ëŠ” ì—¬ëŸ¬ ì¸ìžê°€ ìžˆìŠµë‹ˆë‹¤. í•˜ì§€ë§Œ ëŒ€ë¶€ë¶„ì€ ìƒëŒ€ì ìœ¼ë¡œ ê°„ë‹¨í•©ë‹ˆë‹¤. ì˜ˆë¥¼ ë“¤ë©´ fdëŠ” IOê°€ ì¼ì–´ë‚  íŒŒì¼ì„ ì´ì•¼ê¸°í•˜ë©°, addrê³¼ lenì€ IOê°€ ì¼ì–´ë‚˜ëŠ” ë©”ëª¨ë¦¬ë¥¼ ê°€ë¦¬í‚¤ëŠ” iovec êµ¬ì¡°ì²´ë¥¼ ë‚˜íƒ€ëƒ…ë‹ˆë‹¤.
 
 <!-- As mentioned above, the io_uring_sqe structures are kept in an array that is mapped into both user and kernel space. Actually submitting one of those structures requires placing its index into the submission queue, which is defined this way: -->
 
-À§¿¡¼­ ÀÌ¾ß±â ÇßµíÀÌ, io_uring_sqe ±¸Á¶Ã¼´Â user¿Í kernel space¿¡ ¸ÅÇÎµÇ´Â ¹è¿­¿¡ ÀúÀåµË´Ï´Ù. »ç½ÇÀº ÀÌ ±¸Á¶Ã¼µé Áß ÇÏ³ª¸¦ Á¦ÃâÇÏ·Á¸é submission queue¿¡ ÀÎµ¦½º¸¦ ÇÒ´çÇØ¾ß ÇÏ¸ç, ¾Æ·¡¿Í °°´Ù.
+ìœ„ì—ì„œ ì´ì•¼ê¸° í–ˆë“¯ì´, io_uring_sqe êµ¬ì¡°ì²´ëŠ” userì™€ kernel spaceì— ë§¤í•‘ë˜ëŠ” ë°°ì—´ì— ì €ìž¥ë©ë‹ˆë‹¤. ì‚¬ì‹¤ì€ ì´ êµ¬ì¡°ì²´ë“¤ ì¤‘ í•˜ë‚˜ë¥¼ ì œì¶œí•˜ë ¤ë©´ submission queueì— ì¸ë±ìŠ¤ë¥¼ í• ë‹¹í•´ì•¼ í•˜ë©°, ì•„ëž˜ì™€ ê°™ë‹¤.
 ```c
     struct io_uring {
 	u32 head;
@@ -109,15 +109,15 @@ opcode´Â ¼öÇàµÉ µ¿ÀÛÀ» ³ªÅ¸³À´Ï´Ù. ¿É¼Ç¿¡´Â IORING_OP_READV, IORING_OP_WRITEV, I
 ```
 <!-- The head and tail values are used to manage entries in the ring; if the two values are equal, the ring is empty. User-space code adds an entry by putting its index into array[r.tail] and incrementing the tail pointer; only the kernel side should change r.head. Once one or more entries have been placed in the ring, they can be submitted with a call to: -->
 
-head¿Í tail °ªÀº ringÀÇ ¿£Æ®¸®¸¦ °ü¸®ÇÕ´Ï´Ù. µÎ °ªÀÌ °°´Ù¸é ringÀº ºñ¾îÀÖ´Â »óÅÂÀÔ´Ï´Ù. userspace ÄÚµå´Â ÀÎµ¦½º¸¦ ¹è¿­¿¡ ³Ö°í tailÀ» Áõ°¡½ÃÅ´À¸·Î¼­ ¿£Æ®¸®¸¦ Ãß°¡ÇÕ´Ï´Ù. ¿ÀÁ÷ Ä¿³Î¸¸ÀÌ r.head¸¦ ¹Ù²Ü ¼ö ÀÖ½À´Ï´Ù. ÇÑ°³ ÀÌ»óÀÇ ¿£Æ®¸®°¡ ring¿¡ µé¾î°¡¸é, ÇÑ¹øÀÇ È£Ãâ·Î Á¦ÃâÇÒ ¼ö ÀÖ½À´Ï´Ù.
+headì™€ tail ê°’ì€ ringì˜ ì—”íŠ¸ë¦¬ë¥¼ ê´€ë¦¬í•©ë‹ˆë‹¤. ë‘ ê°’ì´ ê°™ë‹¤ë©´ ringì€ ë¹„ì–´ìžˆëŠ” ìƒíƒœìž…ë‹ˆë‹¤. userspace ì½”ë“œëŠ” ì¸ë±ìŠ¤ë¥¼ ë°°ì—´ì— ë„£ê³  tailì„ ì¦ê°€ì‹œí‚´ìœ¼ë¡œì„œ ì—”íŠ¸ë¦¬ë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤. ì˜¤ì§ ì»¤ë„ë§Œì´ r.headë¥¼ ë°”ê¿€ ìˆ˜ ìžˆìŠµë‹ˆë‹¤. í•œê°œ ì´ìƒì˜ ì—”íŠ¸ë¦¬ê°€ ringì— ë“¤ì–´ê°€ë©´, í•œë²ˆì˜ í˜¸ì¶œë¡œ ì œì¶œí•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
 
     int io_uring_enter(unsigned int fd, u32 to_submit, u32 min_complete, u32 flags);
 
 <!-- Here, fd is the file descriptor associated with the ring, and to_submit is the number of entries in the ring that the kernel should submit at this time. The return value should be zero if all goes well. -->
-¿©±â fd´Â ring°ú °ü·ÃµÇ¾î ÀÖÀ¸¸ç to_submitÀº Ä¿³ÎÀÌ Á¦ÃâÇØ¾ßÇÏ´Â ¸µ ¾ÈÀÇ ¿£Æ®¸®ÀÇ ¼ýÀÚÀÔ´Ï´Ù. ¸®ÅÏ°ªÀº ¼º°øÇÏ¸é 0ÀÔ´Ï´Ù.
+ì—¬ê¸° fdëŠ” ringê³¼ ê´€ë ¨ë˜ì–´ ìžˆìœ¼ë©° to_submitì€ ì»¤ë„ì´ ì œì¶œí•´ì•¼í•˜ëŠ” ë§ ì•ˆì˜ ì—”íŠ¸ë¦¬ì˜ ìˆ«ìžìž…ë‹ˆë‹¤. ë¦¬í„´ê°’ì€ ì„±ê³µí•˜ë©´ 0ìž…ë‹ˆë‹¤.
 
 <!-- Completion events will find their way into the completion queue as operations are executed. If flags contains IORING_ENTER_GETEVENTS and min_complete is nonzero, io_uring_enter() will block until at least that many operations have completed. The actual results can be found in the completion structure: -->
-completion ÀÌº¥Æ®´Â µ¿ÀÛÀÌ ½ÇÇàµÇ¸é completion queue·Î °©´Ï´Ù. flags°¡ IORING_ENTER_GETEVENTS¸¦ Æ÷ÇÔÇÏ°í min_complete°¡ 0ÀÌ ¾Æ´Ï¸é, io_uring_enter()´Â µ¿ÀÛÀÌ ¿Ï·á µÉ¶§±îÁö blockµË´Ï´Ù. ½ÇÁ¦ °á°ú´Â completion ±¸Á¶Ã¼¸¦ ÅëÇØ¼­ ¾òÀ» ¼ö ÀÖ½À´Ï´Ù.
+completion ì´ë²¤íŠ¸ëŠ” ë™ìž‘ì´ ì‹¤í–‰ë˜ë©´ completion queueë¡œ ê°‘ë‹ˆë‹¤. flagsê°€ IORING_ENTER_GETEVENTSë¥¼ í¬í•¨í•˜ê³  min_completeê°€ 0ì´ ì•„ë‹ˆë©´, io_uring_enter()ëŠ” ë™ìž‘ì´ ì™„ë£Œ ë ë•Œê¹Œì§€ blockë©ë‹ˆë‹¤. ì‹¤ì œ ê²°ê³¼ëŠ” completion êµ¬ì¡°ì²´ë¥¼ í†µí•´ì„œ ì–»ì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
 ```c
     struct io_uring_cqe {
 	__u64	user_data;	/* sqe->user_data submission passed back */
@@ -126,10 +126,10 @@ completion ÀÌº¥Æ®´Â µ¿ÀÛÀÌ ½ÇÇàµÇ¸é completion queue·Î °©´Ï´Ù. flags°¡ IORING_EN
     };
 ```
 <!-- Where user_data is a value passed from user space when the operation was submitted and res is the return code for the operation. The flags field will contain IOCQE_FLAG_CACHEHIT if the request could be satisfied without needing to perform I/O ? an option that may yet have to be reconsidered given the current concern about using the page cache as a side channel. -->
-user_data´Â userspace¿¡¼­ Á¦ÃâµÇ¾úÀ» ¶§ °ªÀÌ ³Ñ°ÜÁö°í res´Â µ¿ÀÛÀÇ ¸®ÅÏ °ªÀÔ´Ï´Ù. ¸¸¾à ¸®Äù½ºÆ®°¡ IO¸¦ ¼öÇàÇÒ ÇÊ¿ä¾øÀÌ ¸¸Á·µÈ´Ù¸é flags ÇÊµå´Â IOCQE_FLAG_CACHEHITÀ» °¡Áø´Ù. ÀÌ°ÍÀº »çÀÌµå Ã¤³Î·Î¼­ ÆäÀÌÁö Ä³½Ã¸¦ »ç¿ëÇÏ´Â °Í¿¡ ´ëÇÑ ¿ì·Á¸¦ »ý°¢ÇØº¸¸é ´Ù½Ã »ý°¢ÇØºÁ¾ßÇÏ´Â ¿É¼ÇÀÔ´Ï´Ù.
+user_dataëŠ” userspaceì—ì„œ ì œì¶œë˜ì—ˆì„ ë•Œ ê°’ì´ ë„˜ê²¨ì§€ê³  resëŠ” ë™ìž‘ì˜ ë¦¬í„´ ê°’ìž…ë‹ˆë‹¤. ë§Œì•½ ë¦¬í€˜ìŠ¤íŠ¸ê°€ IOë¥¼ ìˆ˜í–‰í•  í•„ìš”ì—†ì´ ë§Œì¡±ëœë‹¤ë©´ flags í•„ë“œëŠ” IOCQE_FLAG_CACHEHITì„ ê°€ì§„ë‹¤. ì´ê²ƒì€ ì‚¬ì´ë“œ ì±„ë„ë¡œì„œ íŽ˜ì´ì§€ ìºì‹œë¥¼ ì‚¬ìš©í•˜ëŠ” ê²ƒì— ëŒ€í•œ ìš°ë ¤ë¥¼ ìƒê°í•´ë³´ë©´ ë‹¤ì‹œ ìƒê°í•´ë´ì•¼í•˜ëŠ” ì˜µì…˜ìž…ë‹ˆë‹¤.
 <!--   
 These structures live in the completion queue, which looks similar to the submission queue: -->
-ÀÌ ±¸Á¶Ã¼µéÀº completion queue ¿¡ ÀÖ°í submission queue ¿Í ºñ½ÁÇÕ´Ï´Ù:
+ì´ êµ¬ì¡°ì²´ë“¤ì€ completion queue ì— ìžˆê³  submission queue ì™€ ë¹„ìŠ·í•©ë‹ˆë‹¤:
 ```c
     struct io_cq_ring {
 	struct io_uring		r;
@@ -140,18 +140,18 @@ These structures live in the completion queue, which looks similar to the submis
     };
 ```
 <!-- In this ring, the r.head index points to the first available completion event, while r.tail points to the last; user space should only change r.head. -->
-ÀÌ ring¿¡¼­´Â r.head ÀÎµ¦½º°¡ Ã¹ completion event¸¦ °¡¸®Å°¸ç, r.tailÀº ¸¶Áö¸·À» °¡¸®Åµ´Ï´Ù; userspace¿¡¼­´Â r.head¸¸À» ¼öÁ¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.
+ì´ ringì—ì„œëŠ” r.head ì¸ë±ìŠ¤ê°€ ì²« completion eventë¥¼ ê°€ë¦¬í‚¤ë©°, r.tailì€ ë§ˆì§€ë§‰ì„ ê°€ë¦¬í‚µë‹ˆë‹¤; userspaceì—ì„œëŠ” r.headë§Œì„ ìˆ˜ì •í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
 
 <!-- The interface as described so far is enough to enable a user-space program to enqueue multiple I/O operations and to collect the results as those operations complete. The functionality is similar to what the current AIO interface provides, though the interface is quite different. Axboe claims that it is far more efficient, but no benchmark results have been included yet to back up that claim. Among other things, this interface can do asynchronous buffered I/O without a context switch in cases where the desired data is in the page cache; buffered I/O has always been a bit of a sore spot for Linux AIO. -->
 
-À§¿¡¼­ ¼³¸íÇÑ ÀÎÅÍÆäÀÌ½ºµéÀº userspace ÇÁ·Î±×·¥¿¡¼­ ´ÙÁß IO µ¿ÀÛÀ» ³Ö°í ±×¿¡ ´ëÇÑ °á°ú¸¦ ¹Þ±â¿¡´Â ÃæºÐÇÕ´Ï´Ù. ±â´ÉÀûÀÎ Ãø¸é¿¡¼­ ÇöÀç AIO ÀÎÅÍÆäÀÌ½º°¡ Á¦°øÇÏ´Â °Í°ú ºñ½ÁÇÏÁö¸¸ ÀÎÅÍÆäÀÌ½º´Â ¸¹ÀÌ ´Ù¸¨´Ï´Ù. Axboe´Â ÈÎ¾À ´Ù¸£´Ù°í ÁÖÀåÇÏ³ª ÀÌ°ÍÀ» µÞ¹ÙÄ§ÇÒ º¥Ä¡¸¶Å© °á°ú°¡ ¾ø½À´Ï´Ù. ¶Ç ´Ù¸¥ °ÍÀº ÀÌ ÀÎÅÍÆäÀÌ½º´Â ÆäÀÌÁö Ä³½ÃÀÇ ¸î¸î °æ¿ì¿¡´Â context switch¾øÀÌ ºñµ¿±â buffered IO¸¦ ÇÒ ¼ö ÀÖ´Ù´Â °ÍÀÔ´Ï´Ù. buffered IO´Â Linux AIOÀÇ ¾ÆÇÂ ¼Õ°¡¶ôÀÔ´Ï´Ù.
+ìœ„ì—ì„œ ì„¤ëª…í•œ ì¸í„°íŽ˜ì´ìŠ¤ë“¤ì€ userspace í”„ë¡œê·¸ëž¨ì—ì„œ ë‹¤ì¤‘ IO ë™ìž‘ì„ ë„£ê³  ê·¸ì— ëŒ€í•œ ê²°ê³¼ë¥¼ ë°›ê¸°ì—ëŠ” ì¶©ë¶„í•©ë‹ˆë‹¤. ê¸°ëŠ¥ì ì¸ ì¸¡ë©´ì—ì„œ í˜„ìž¬ AIO ì¸í„°íŽ˜ì´ìŠ¤ê°€ ì œê³µí•˜ëŠ” ê²ƒê³¼ ë¹„ìŠ·í•˜ì§€ë§Œ ì¸í„°íŽ˜ì´ìŠ¤ëŠ” ë§Žì´ ë‹¤ë¦…ë‹ˆë‹¤. AxboeëŠ” í›¨ì”¬ ë‹¤ë¥´ë‹¤ê³  ì£¼ìž¥í•˜ë‚˜ ì´ê²ƒì„ ë’·ë°”ì¹¨í•  ë²¤ì¹˜ë§ˆí¬ ê²°ê³¼ê°€ ì—†ìŠµë‹ˆë‹¤. ë˜ ë‹¤ë¥¸ ê²ƒì€ ì´ ì¸í„°íŽ˜ì´ìŠ¤ëŠ” íŽ˜ì´ì§€ ìºì‹œì˜ ëª‡ëª‡ ê²½ìš°ì—ëŠ” context switchì—†ì´ ë¹„ë™ê¸° buffered IOë¥¼ í•  ìˆ˜ ìžˆë‹¤ëŠ” ê²ƒìž…ë‹ˆë‹¤. buffered IOëŠ” Linux AIOì˜ ì•„í”ˆ ì†ê°€ë½ìž…ë‹ˆë‹¤.
 
 <!-- Advanced features
 
 There are, however, some more features worthy of note in this interface. One of those is the ability to map a program's I/O buffers into the kernel. This mapping normally happens with each I/O operation so that data can be copied into or out of the buffers; the buffers are unmapped when the operation completes. If the buffers will be used many times over the course of the program's execution, it is far more efficient to map them once and leave them in place. This mapping is done by filling in yet another structure describing the buffers to be mapped: -->
 
-°í±Þ ±â´É:
-ÀÌ ÀÎÅÍÆäÀÌ½º´Â ÁÖ¸ñÇÒ ¸¸ÇÑ ±â´ÉÀÌ ¸î °¡Áö ´õ ÀÖ½À´Ï´Ù. ÇÁ·Î±×·¥ÀÇ IO ¹öÆÛ¸¦ Ä¿³Î¿¡ ¸ÅÇÎÇÏ´Â °ÍÀÔ´Ï´Ù. º¸Åë °¢ IO ¿¬»ê µ¥ÀÌÅÍ°¡ ¹öÆÛ ¾È¹ÛÀ¸·Î º¹»ç µÉ ¶§ ÀÏ¾î³³´Ï´Ù. ¹öÆÛµéÀº ¿¬»êÀÌ ³¡³ª¸é ¸ÅÇÎÀÌ ÇØÁ¦µË´Ï´Ù. ¹öÆÛµéÀÌ ÇÁ·Î±×·¥ ½ÇÇà Áß¿¡ ¿©·¯¹ø »ç¿ëµÈ´Ù¸é ÇÑ¹ø ¸ÅÇÎÇØµÎ´Â °Íº¸´Ù ÈÎ¾À È¿À²ÀûÀÏ °ÍÀÔ´Ï´Ù.
+ê³ ê¸‰ ê¸°ëŠ¥:
+ì´ ì¸í„°íŽ˜ì´ìŠ¤ëŠ” ì£¼ëª©í•  ë§Œí•œ ê¸°ëŠ¥ì´ ëª‡ ê°€ì§€ ë” ìžˆìŠµë‹ˆë‹¤. í”„ë¡œê·¸ëž¨ì˜ IO ë²„í¼ë¥¼ ì»¤ë„ì— ë§¤í•‘í•˜ëŠ” ê²ƒìž…ë‹ˆë‹¤. ë³´í†µ ê° IO ì—°ì‚° ë°ì´í„°ê°€ ë²„í¼ ì•ˆë°–ìœ¼ë¡œ ë³µì‚¬ ë  ë•Œ ì¼ì–´ë‚©ë‹ˆë‹¤. ë²„í¼ë“¤ì€ ì—°ì‚°ì´ ëë‚˜ë©´ ë§¤í•‘ì´ í•´ì œë©ë‹ˆë‹¤. ë²„í¼ë“¤ì´ í”„ë¡œê·¸ëž¨ ì‹¤í–‰ ì¤‘ì— ì—¬ëŸ¬ë²ˆ ì‚¬ìš©ëœë‹¤ë©´ í•œë²ˆ ë§¤í•‘í•´ë‘ëŠ” ê²ƒë³´ë‹¤ í›¨ì”¬ íš¨ìœ¨ì ì¼ ê²ƒìž…ë‹ˆë‹¤.
 
 ```c
     struct io_uring_register_buffers {
@@ -161,7 +161,7 @@ There are, however, some more features worthy of note in this interface. One of 
 ```
 
 <!-- That structure is then passed to another new system call: -->
-ÀÌ ±¸Á¶Ã¼´Â »õ·Î¿î ½Ã½ºÅÛ ÄÝ·Î Àü´ÞµÈ´Ù.
+ì´ êµ¬ì¡°ì²´ëŠ” ìƒˆë¡œìš´ ì‹œìŠ¤í…œ ì½œë¡œ ì „ë‹¬ëœë‹¤.
 
 ```c
     int io_uring_register(unsigned int fd, unsigned int opcode, void *arg);
@@ -169,28 +169,28 @@ There are, however, some more features worthy of note in this interface. One of 
 
 <!-- In this case, the opcode should be IORING_REGISTER_BUFFERS. The buffers will remain mapped for as long as the initial file descriptor remains open, unless the program explicitly unmaps them with IORING_UNREGISTER_BUFFERS. Mapping buffers in this way is essentially locking memory into RAM, so the usual resource limit that applies to mlock() applies here as well. When performing I/O to premapped buffers, the IORING_OP_READ_FIXED and IORING_OP_WRITE_FIXED operations should be used. -->
 
-ÀÌ °æ¿ì, opcode´Â IORING_REGISTER_BUFFERS°¡ µË´Ï´Ù. ÇÁ·Î±×·¥¿¡¼­ IORING_UNREGISTER_BUFFERS¸¦ ÅëÇØ¼­ ¸í½ÃÀûÀ¸·Î unmapÀ» ÇÏÁö ¾Ê´Â ÀÌ»ó, ÃÊ±â fd°¡ openµÈ »óÅÂ¿Í ÇÔ²² ¹öÆÛÀÇ ¸ÅÇÎÀÌ À¯ÁöµË´Ï´Ù. ¹öÆÛ¸¦ mappingÇÏ´Â °ÍÀº ¸Þ¸ð¸®¸¦ RAM¿¡ locking ÇÏ´Â °ÍÀÔ´Ï´Ù. mlock()¿¡ »ç¿ëµÇ´Â ¸®¼Ò½º ÇÑµµ°¡ ¿©±â¿¡µµ Àû¿ëµÈ´Ù. ¸ÅÇÎµÈ ¹öÆÛ¿¡ IOµ¿ÀÛÀ» ¼öÇàÇÏ´Â °ÍÀº IORING_OP_READ_FIXED¿Í IORING__OP_WRITE_FIXED°¡ »ç¿ëµË´Ï´Ù. 
+ì´ ê²½ìš°, opcodeëŠ” IORING_REGISTER_BUFFERSê°€ ë©ë‹ˆë‹¤. í”„ë¡œê·¸ëž¨ì—ì„œ IORING_UNREGISTER_BUFFERSë¥¼ í†µí•´ì„œ ëª…ì‹œì ìœ¼ë¡œ unmapì„ í•˜ì§€ ì•ŠëŠ” ì´ìƒ, ì´ˆê¸° fdê°€ openëœ ìƒíƒœì™€ í•¨ê»˜ ë²„í¼ì˜ ë§¤í•‘ì´ ìœ ì§€ë©ë‹ˆë‹¤. ë²„í¼ë¥¼ mappingí•˜ëŠ” ê²ƒì€ ë©”ëª¨ë¦¬ë¥¼ RAMì— locking í•˜ëŠ” ê²ƒìž…ë‹ˆë‹¤. mlock()ì— ì‚¬ìš©ë˜ëŠ” ë¦¬ì†ŒìŠ¤ í•œë„ê°€ ì—¬ê¸°ì—ë„ ì ìš©ëœë‹¤. ë§¤í•‘ëœ ë²„í¼ì— IOë™ìž‘ì„ ìˆ˜í–‰í•˜ëŠ” ê²ƒì€ IORING_OP_READ_FIXEDì™€ IORING__OP_WRITE_FIXEDê°€ ì‚¬ìš©ë©ë‹ˆë‹¤. 
 
 <!-- There is also an IORING_REGISTER_FILES operation that can be used to optimize situations where many operations will be performed on the same file(s). -->
-IORING_REGISTER_FILES¶ó´Â ¿É¼Çµµ ÀÖ´Â µ¥ ÀÌ°ÍÀº °°Àº ÆÄÀÏ¿¡ ¿©·¯ ¿¬»êÀÌ µ¿ÀÛÇÒ ¶§ ÃÖÀûÈ­¸¦ À§ÇØ¼­ »ç¿ëÇÕ´Ï´Ù.
+IORING_REGISTER_FILESë¼ëŠ” ì˜µì…˜ë„ ìžˆëŠ” ë° ì´ê²ƒì€ ê°™ì€ íŒŒì¼ì— ì—¬ëŸ¬ ì—°ì‚°ì´ ë™ìž‘í•  ë•Œ ìµœì í™”ë¥¼ ìœ„í•´ì„œ ì‚¬ìš©í•©ë‹ˆë‹¤.
 
 <!-- In many high-bandwidth settings, it can be more efficient for the application to poll for completion events rather than having the kernel collect them and wake the application up; that is the motivation behind the existing block-layer polling interface, for example. Polling is most efficient in situations where, by the time the application gets around to doing a poll, there is almost certainly at least one completion ready for it to consume. This polling mode can be enabled for io_uring by setting the IORING_SETUP_IOPOLL flag when calling io_uring_setup(). In such rings, an occasional call to io_uring_enter() (with the IORING_ENTER_GETEVENTS flag set) is mandatory to ensure that completion events actually make it into the completion queue. -->
 
-¸¹Àº high-bandwidth °æ¿ì¿¡¼­, completion event¸¦ pollingÇÏ´Â °ÍÀÌ Ä¿³ÎÀÌ ÀÌº¥Æ®¸¦ ÅëÇØ¼­ ¾îÇÃ¸®ÄÉÀÌ¼ÇÀ» ±ú¿öÁÖ´Â ¹æ½Äº¸´Ù È¿À²ÀûÀÔ´Ï´Ù. ¿¹¸¦ µé¸é, ÀÌ°ÍÀº ±âÁ¸¿¡ Á¸ÀçÇÏ´Â block-layer polling interfaceÀÇ µ¿±â°¡ µË´Ï´Ù. Àû¾îµµ ÇÏ³ªÀÇ »ç¿ëµÉ completion ÀÌº¥Æ®°¡ ÀÖ°í ÀÌ°ÍÀ» ¾îÇÃ¸®ÄÉÀÌ¼ÇÀÌ polling À» ÇÏ°í ÀÖÀ» ¶§ pollingÀº °¡Àå È¿À²ÀûÀÔ´Ï´Ù. ÀÌ polling mode´Â io_uringÀÇ io_uring_setup()À» È£ÃâÇÒ ¶§ IORING_SETUP_IOPOLLÇÃ·¡±×¸¦ ¼¼ÆÃÇÏ¸é µ¿ÀÛÇÕ´Ï´Ù. completion ÀÌº¥Æ®¸¦ completion Å¥¿¡ ÀÛ¼ºµÇµµ·Ï ÇÏ·Á¸é io_uring_enter()¸¦ È£ÃâÇØ¾ß ÇÕ´Ï´Ù.
+ë§Žì€ high-bandwidth ê²½ìš°ì—ì„œ, completion eventë¥¼ pollingí•˜ëŠ” ê²ƒì´ ì»¤ë„ì´ ì´ë²¤íŠ¸ë¥¼ í†µí•´ì„œ ì–´í”Œë¦¬ì¼€ì´ì…˜ì„ ê¹¨ì›Œì£¼ëŠ” ë°©ì‹ë³´ë‹¤ íš¨ìœ¨ì ìž…ë‹ˆë‹¤. ì˜ˆë¥¼ ë“¤ë©´, ì´ê²ƒì€ ê¸°ì¡´ì— ì¡´ìž¬í•˜ëŠ” block-layer polling interfaceì˜ ë™ê¸°ê°€ ë©ë‹ˆë‹¤. ì ì–´ë„ í•˜ë‚˜ì˜ ì‚¬ìš©ë  completion ì´ë²¤íŠ¸ê°€ ìžˆê³  ì´ê²ƒì„ ì–´í”Œë¦¬ì¼€ì´ì…˜ì´ polling ì„ í•˜ê³  ìžˆì„ ë•Œ pollingì€ ê°€ìž¥ íš¨ìœ¨ì ìž…ë‹ˆë‹¤. ì´ polling modeëŠ” io_uringì˜ io_uring_setup()ì„ í˜¸ì¶œí•  ë•Œ IORING_SETUP_IOPOLLí”Œëž˜ê·¸ë¥¼ ì„¸íŒ…í•˜ë©´ ë™ìž‘í•©ë‹ˆë‹¤. completion ì´ë²¤íŠ¸ë¥¼ completion íì— ìž‘ì„±ë˜ë„ë¡ í•˜ë ¤ë©´ io_uring_enter()ë¥¼ í˜¸ì¶œí•´ì•¼ í•©ë‹ˆë‹¤.
 
 <!-- Finally, there is also a fully polled mode that (almost) eliminates the need to make any system calls at all. This mode is enabled by setting the IORING_SETUP_SQPOLL flag at ring setup time. A call to io_uring_enter() will kick off a kernel thread that will occasionally poll the submission queue and automatically submit any requests found there; receive-queue polling is also performed if it has been requested. As long as the application continues to submit I/O and consume the results, I/O will happen with no further system calls. -->
 
-¸¶Áö¸·À¸·Î, ½Ã½ºÅÛ ÄÝÀÌ °ÅÀÇ ÇÊ¿ä¾ø´Â ¿ÏÀüÇÑ polled modeµµ ÀÖ½À´Ï´Ù. ÀÌ ¸ðµå´Â IORING_SETUP_SQPOLL ÇÃ·¡±×¸¦ ¼¼ÆÃÇÏ¸é °¡´ÉÇÕ´Ï´Ù. io_uring_enter()¸¦ È£ÃâÇÏ¸é Ä¿³Î½º·¹µå°¡ ½ÇÇàµÇ°í submission queue¸¦ pollingÇÏ¸ç °Å±â¿¡ ÀÖ´Â ¿äÃ»µéÀ» Á¦ÃâÇÕ´Ï´Ù; ¿äÃ»¹ÞÀ¸¸é receive-queue polling ¶ÇÇÑ ¼öÇàÇÕ´Ï´Ù. ¾îÇÃ¸®ÄÉÀÌ¼ÇÀÌ IO¸¦ ¿äÃ»ÇÏ°í °á°ú¸¦ ¹ÞÀ» µ¿¾È ½Ã½ºÅÛ ÄÝ ¾øÀÌ IO°¡ ¹ß»ýÇÕ´Ï´Ù. 
+ë§ˆì§€ë§‰ìœ¼ë¡œ, ì‹œìŠ¤í…œ ì½œì´ ê±°ì˜ í•„ìš”ì—†ëŠ” ì™„ì „í•œ polled modeë„ ìžˆìŠµë‹ˆë‹¤. ì´ ëª¨ë“œëŠ” IORING_SETUP_SQPOLL í”Œëž˜ê·¸ë¥¼ ì„¸íŒ…í•˜ë©´ ê°€ëŠ¥í•©ë‹ˆë‹¤. io_uring_enter()ë¥¼ í˜¸ì¶œí•˜ë©´ ì»¤ë„ìŠ¤ë ˆë“œê°€ ì‹¤í–‰ë˜ê³  submission queueë¥¼ pollingí•˜ë©° ê±°ê¸°ì— ìžˆëŠ” ìš”ì²­ë“¤ì„ ì œì¶œí•©ë‹ˆë‹¤; ìš”ì²­ë°›ìœ¼ë©´ receive-queue polling ë˜í•œ ìˆ˜í–‰í•©ë‹ˆë‹¤. ì–´í”Œë¦¬ì¼€ì´ì…˜ì´ IOë¥¼ ìš”ì²­í•˜ê³  ê²°ê³¼ë¥¼ ë°›ì„ ë™ì•ˆ ì‹œìŠ¤í…œ ì½œ ì—†ì´ IOê°€ ë°œìƒí•©ë‹ˆë‹¤. 
 
 <!-- Eventually, though (after one second currently), the kernel will get bored if no new requests are submitted and the polling will stop. When that happens, the flags field in the submission queue structure will have the IORING_SQ_NEED_WAKEUP bit set. The application should check for this bit and, if it is set, make a new call to io_uring_enter() to start the mechanism up again. -->
 
-°á·ÐÀûÀ¸·Î, »õ·Î¿î request°¡ ¾ø°í polling ÀÌ ¸ØÃß¸é Ä¿³ÎÀÌ Áö·çÇÒ °ÍÀÔ´Ï´Ù. ±× ¶§¿¡´Â submission queue¿¡ IORING_SQ_NEED_WAKEUP°¡ ¼¼ÆÃµÉ °ÍÀÔ´Ï´Ù. ¾îÇÃ¸®ÄÉÀÌ¼Ç¿¡¼­´Â ºñÆ®¸¦ Ã¼Å©ÇØ¼­ ¼¼ÆÃµÇ¾î ÀÖ´Ù¸é io_uring_enter()¸¦ È£ÃâÇÏ¿© ´Ù½Ã ¸ÞÄ¿´ÏÁòÀ» ½ÇÇàÇØ¾ß ÇÕ´Ï´Ù.
+ê²°ë¡ ì ìœ¼ë¡œ, ìƒˆë¡œìš´ requestê°€ ì—†ê³  polling ì´ ë©ˆì¶”ë©´ ì»¤ë„ì´ ì§€ë£¨í•  ê²ƒìž…ë‹ˆë‹¤. ê·¸ ë•Œì—ëŠ” submission queueì— IORING_SQ_NEED_WAKEUPê°€ ì„¸íŒ…ë  ê²ƒìž…ë‹ˆë‹¤. ì–´í”Œë¦¬ì¼€ì´ì…˜ì—ì„œëŠ” ë¹„íŠ¸ë¥¼ ì²´í¬í•´ì„œ ì„¸íŒ…ë˜ì–´ ìžˆë‹¤ë©´ io_uring_enter()ë¥¼ í˜¸ì¶œí•˜ì—¬ ë‹¤ì‹œ ë©”ì»¤ë‹ˆì¦˜ì„ ì‹¤í–‰í•´ì•¼ í•©ë‹ˆë‹¤.
 
 <!-- This patch set is in its third version as of this writing, though that is a bit deceptive since there were (at least) ten revisions of the polled AIO patch set that preceded it. While it is possible that the interface is beginning to stabilize, it would not be surprising to see some significant changes yet. One review comment that has not yet been addressed is Matthew Wilcox's request that the name be changed to "something that looks a little less like io_urine". That could yet become the biggest remaining issue ? as we all know, naming is always the hardest part in the end. But, once those details are worked out, the kernel may yet have an asynchronous I/O implementation that is not a constant source of complaints. -->
 
-ÀÌ ÆÐÄ¡ ¼ÂÀº ÀÌ¹ø¿¡ ÀÛ¼ºÇÑ °ÍÀÌ ¼¼¹øÂ° ¹öÀüÀÔ´Ï´Ù. ÀÌÀü¿¡ ÃÖ¼Ò 10°³ÀÇ °³Á¤µÈ polled AIO ÆÐÄ¡°¡ ÀÖ¾ú±â ¶§¹®¿¡ ¾à°£ ±â¸¸ÀûÀÔ´Ï´Ù. ¹Ý¸é¿¡ ÀÌÁ¦ ¾ÈÁ¤È­¸¦ ½ÃÀÛÇÒ ¼ö ÀÖ¾î¼­ ¾ÆÁ÷ Æ¯º°È÷ Å« º¯°æ»çÇ×ÀÌ ¾ø´Ù´Â °ÍÀÌ ±×´ÙÁö ³î¶øÁö ¾Ê½À´Ï´Ù. ÀÌ¸§À» "io_urine°ú ´ú ºñ½ÁÇÑ °Í"À» ¹Ù²ã¾ß ÇÑ´Ù´Â Matthew WilcoxÀÇ ¿äÃ»Àº ¾ÆÁ÷ °ËÅäÇÏÁö ¾Ê¾Ò½À´Ï´Ù. ÀÌ°ÍÀÌ ³²Àº °¡Àå Å« ÀÌ½´°¡ µÉ ¼ö ÀÖ½À´Ï´Ù. ¸ðµÎµé ¾ËµíÀÌ, ÀÌ¸§Áþ´Â °ÍÀº ¸¶Áö¸·ÀÇ °¡Àå ¾î·Á¿î ºÎºÐÀÔ´Ï´Ù. ±×·¯³ª ÀÌ·¯ÇÑ ¼¼¼¼ÇÑ ºÎºÐÀÌ ÇØ°áµÇ¸é ¸®´ª½º Ä¿³ÎÀº ºÒ¸¸ ¾ø´Â ºñµ¿±â IO ±¸ÇöÃ¼¸¦ °¡Áú °ÍÀÔ´Ï´Ù.
+ì´ íŒ¨ì¹˜ ì…‹ì€ ì´ë²ˆì— ìž‘ì„±í•œ ê²ƒì´ ì„¸ë²ˆì§¸ ë²„ì „ìž…ë‹ˆë‹¤. ì´ì „ì— ìµœì†Œ 10ê°œì˜ ê°œì •ëœ polled AIO íŒ¨ì¹˜ê°€ ìžˆì—ˆê¸° ë•Œë¬¸ì— ì•½ê°„ ê¸°ë§Œì ìž…ë‹ˆë‹¤. ë°˜ë©´ì— ì´ì œ ì•ˆì •í™”ë¥¼ ì‹œìž‘í•  ìˆ˜ ìžˆì–´ì„œ ì•„ì§ íŠ¹ë³„ížˆ í° ë³€ê²½ì‚¬í•­ì´ ì—†ë‹¤ëŠ” ê²ƒì´ ê·¸ë‹¤ì§€ ë†€ëžì§€ ì•ŠìŠµë‹ˆë‹¤. ì´ë¦„ì„ "io_urineê³¼ ëœ ë¹„ìŠ·í•œ ê²ƒ"ì„ ë°”ê¿”ì•¼ í•œë‹¤ëŠ” Matthew Wilcoxì˜ ìš”ì²­ì€ ì•„ì§ ê²€í† í•˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. ì´ê²ƒì´ ë‚¨ì€ ê°€ìž¥ í° ì´ìŠˆê°€ ë  ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ëª¨ë‘ë“¤ ì•Œë“¯ì´, ì´ë¦„ì§“ëŠ” ê²ƒì€ ë§ˆì§€ë§‰ì˜ ê°€ìž¥ ì–´ë ¤ìš´ ë¶€ë¶„ìž…ë‹ˆë‹¤. ê·¸ëŸ¬ë‚˜ ì´ëŸ¬í•œ ì„¸ì„¸í•œ ë¶€ë¶„ì´ í•´ê²°ë˜ë©´ ë¦¬ëˆ…ìŠ¤ ì»¤ë„ì€ ë¶ˆë§Œ ì—†ëŠ” ë¹„ë™ê¸° IO êµ¬í˜„ì²´ë¥¼ ê°€ì§ˆ ê²ƒìž…ë‹ˆë‹¤.
 
 <!-- For the curious, Axboe has posted a complete example of a program that uses the io_uring interface.  -->
-±Ã±ÝÁõÀ» À§ÇØ, Axobe´Â io_uring ÀÎÅÍÆäÀÌ½ºÀÇ ¿ÏÀüÇÑ ¿¹Á¦ ÇÁ·Î±×·¥À» °Ô½ÃÇß½À´Ï´Ù.
+ê¶ê¸ˆì¦ì„ ìœ„í•´, AxobeëŠ” io_uring ì¸í„°íŽ˜ì´ìŠ¤ì˜ ì™„ì „í•œ ì˜ˆì œ í”„ë¡œê·¸ëž¨ì„ ê²Œì‹œí–ˆìŠµë‹ˆë‹¤.
 
-¿ø¹® : [LWN: Ringing in a new asynchronous I/O API](https://lwn.net/Articles/776703/)
+ì›ë¬¸ : [LWN: Ringing in a new asynchronous I/O API](https://lwn.net/Articles/776703/)
